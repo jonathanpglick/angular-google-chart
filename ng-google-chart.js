@@ -57,7 +57,29 @@
                     window.google.load('visualization', apiConfig.version, settings);
                 };
 
-            jQuery.getScript(googleJsapiUrl, onLoad);
+            function getScript(url, callback) {
+                var script = document.createElement("script");
+                    script.type = "text/javascript";
+                if (script.readyState) {
+                    //IE
+                    script.onreadystatechange = function() {
+                        if (script.readyState == "loaded" || script.readyState == "complete") {
+                            script.onreadystatechange = null;
+                            callback();
+                        }
+                    };
+                } else {
+                    //Others
+                    script.onload = function(){
+                        callback();
+                    };
+                }
+
+                script.src = url;
+                document.getElementsByTagName("head")[0].appendChild(script);
+            }
+
+            getScript(googleJsapiUrl, onLoad);
 
             return function (fn, context) {
                 var args = Array.prototype.slice.call(arguments, 2);
@@ -150,7 +172,7 @@
                                 var dataTable;
                                 if ($scope.chart.data instanceof google.visualization.DataTable)
                                     dataTable = $scope.chart.data;
-                                else if (jQuery.isArray($scope.chart.data))
+                                else if (angular.isArray($scope.chart.data))
                                     dataTable = google.visualization.arrayToDataTable($scope.chart.data);
                                 else
                                     dataTable = new google.visualization.DataTable($scope.chart.data, 0.5);
